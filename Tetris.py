@@ -23,6 +23,9 @@ plt.axis('off')
 ax = fig.add_subplot(111)
 ax.set_title('Tetris')
 
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+score_card = ax.text(0.65, 1.1, 'Score: 0', transform=ax.transAxes, verticalalignment='top', bbox=props)
+
 board = Board()
 board.start_round()
 data = ax.pcolormesh(board.grid, edgecolor='k', linewidth=0.2)
@@ -33,6 +36,7 @@ while board.tetrimino is not None:
     data.set_array(board.grid)
     data.set_clim(vmax=len(board.registry))
     data.set_cmap(c.ListedColormap(board.registry))
+    score_card.set_text(f'Score: {board.score}')
     fig.canvas.draw()
     time.sleep(.2)
     fig.canvas.flush_events()
