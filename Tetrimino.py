@@ -2,9 +2,12 @@ adj = [[0,1], [1,0], [0,-1], [-1,0]]
 diag = [[1,1], [1,-1], [-1,-1], [-1, 1]]
 faradj = [[0,2], [2,0], [0,-2], [-2,0]]
 
+# Cycles coordinate to the next value according to direction
 def get_next(arr, clockwise, prev):
     return arr[(arr.index(prev) + (1 if clockwise else -1)) % len(arr)]
 
+# Handles individual tetriminos, all coordinates are local with respect to the
+# pivot of the tetrimino. 
 class Tetrimino:
     def __init__(self, squares, colors = (0.5, 0.5, 0.5)):
         self.direction = 0
@@ -14,6 +17,7 @@ class Tetrimino:
     def __str__(self):
         return str(self.squares)
     
+    # Gets bottom row of this tetrimino
     def bottom(self):
         retval = {}
         for i in self.squares:
@@ -24,6 +28,7 @@ class Tetrimino:
                 retval[i[1]] = i[0]
         return [[v, k] for k, v in retval.items()]
     
+    # Rotates the piece about the pivot
     def rotate(self, clockwise):
         retval = []
         for i in range(len(self.squares)):
@@ -37,6 +42,7 @@ class Tetrimino:
                 retval.append(get_next(diag, clockwise, self.squares[i]))
         return retval
 
+# Traditional tetris pieces
 def I(): return Tetrimino([[0,0], [0,-1], [0, 1], [0,2]], (0, 204/256, 204/256))
 def O(): return Tetrimino([[0,0], [0,-1], [1, -1], [1,0]], (1, 1, 0))
 def T(): return Tetrimino([[0,0], [0,-1], [1, 0], [0,1]], (153/256, 51/256, 1))
