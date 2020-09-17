@@ -1,5 +1,5 @@
 from operator import itemgetter
-from Tetrimino import DEFAULTS
+from Tetrimino import DEFAULTS, Tetrimino
 import numpy as np
 import random
 import sys
@@ -24,30 +24,39 @@ class Board:
     def __str__(self):
         return str(self.grid)
     
-    def controls(self, inp):
-        if inp == 'a':
-            if len(list(filter(lambda x: x[1] == 0 or [x[0],x[1] - 1] in self.coral, [self.focus + np.array(i) for i in self.tetrimino.squares]))) == 0:
-                self.move_tetrimino(np.array([0,-1]))
+    def controls(self, inp, shift=False, control=False):
+        delta = 2 if shift else 1
+        if control:
+            if inp == 'w':
+                self.jump(np.array([-1, 0]))
+            elif inp == 'a':
+                self.jump(np.array([0,-1]))
+            elif inp == 's':
+                self.jump(np.array([1, 0]))
+            elif inp == 'd':
+                self.jump(np.array([0,1]))
+        elif inp == 'a':
+            if not self.stop_check(rng=delta, direction=np.array([0,-1])):
+                self.move_tetrimino(np.array([0, -delta]))
         elif inp == 'd':
-            if len(list(filter(lambda x: x[1] == 9 or [x[0],x[1] + 1] in self.coral, [self.focus + np.array(i) for i in self.tetrimino.squares]))) == 0:
-                self.move_tetrimino(np.array([0,1]))
+            if not self.stop_check(rng=delta, direction=np.array([0,1])):
+                self.move_tetrimino(np.array([0, delta]))
         elif inp == 'e':
             rotated = self.tetrimino.rotate(clockwise=True)
+            if shift: rotated = Tetrimino(rotated).rotate(clockwise=True)
             if len(list(filter(lambda x: x[1] + self.focus[1] in [-1, 10], rotated))) == 0:
                 self.draw_tetrimino(clean=True)
                 self.tetrimino.squares = rotated
                 self.draw_tetrimino()
         elif inp == 'q':
             rotated = self.tetrimino.rotate(clockwise=False)
+            if shift: rotated = Tetrimino(rotated).rotate(clockwise=False)
             if len(list(filter(lambda x: x[1] + self.focus[1] in [-1, 10], rotated))) == 0:
                 self.draw_tetrimino(clean=True)
                 self.tetrimino.squares = rotated
                 self.draw_tetrimino()
         elif inp == 's':
-            i = 1
-            while not self.stop_check(rng=i):
-                i += 1
-            self.move_tetrimino(np.array([i-1,0]))
+            self.jump(np.array([1,0]))
 
     def delete_row(self, row):
         self.grid[row, :] = np.zeros((10,))
@@ -71,6 +80,12 @@ class Board:
     def gravity(self):
         self.move_tetrimino(np.array([1, 0]))
     
+    def jump(self, vector):
+        i = 0
+        while not self.stop_check(rng=i+1, direction=vector):
+            i += 1
+        self.move_tetrimino(i * vector)
+
     def move_tetrimino(self, vector):
         self.draw_tetrimino(clean=True)
         self.focus += vector
@@ -106,15 +121,14 @@ class Board:
         self.epoch = self.timer = time.time()
         self.set_tetrimino(random.choice(DEFAULTS)())
     
-    def stop_check(self, rng=1):
+    def stop_check(self, rng=1, direction=np.array([1,0])):
         for i in self.tetrimino.squares:
-            x, y = self.focus + np.array(i)
-            if x + rng == 24 or [x + rng, y] in self.coral:
+            x, y = self.focus + np.array(i) + rng * direction
+            if x < 0 or x > 23 or y < 0 or y > 9 or [x, y] in self.coral:
                 return True
         return False
 
     def tick(self):
-        tid = self.registry.index(self.tetrimino.color)
         stop = self.stop_check()
         if stop:
             self.solidify_tetrimino()

@@ -6,15 +6,23 @@ from matplotlib import colors as c
 
 from Board import Board
 
-def controls(event):
+def key_press_handler(event):
     sys.stdout.flush()
     if event.key in 'adeqs':
-        board.controls(event.key)
+        board.controls(event.key, shift=False, control=False)
+        fig.canvas.draw()
+    elif event.key in 'ADSEQ':
+        board.controls(event.key.lower(), shift=True, control=False)
+        fig.canvas.draw()
+    elif 'ctrl+' in event.key and event.key.split('+')[1] in 'wasdWASD':
+        board.controls(event.key.lower()[-1], shift=False, control=True)
         fig.canvas.draw()
 
 plt.rcParams['figure.figsize'] = (2.7, 8)
 plt.rcParams['keymap.save'].remove('s')
+plt.rcParams['keymap.save'].remove('ctrl+s')
 plt.rcParams['keymap.quit'].remove('q')
+plt.rcParams['keymap.quit'].remove('ctrl+w')
 
 plt.ion()
 fig = plt.figure()
@@ -29,7 +37,7 @@ score_card = ax.text(0.65, 1.1, 'Score: 0', transform=ax.transAxes, verticalalig
 board = Board()
 board.start_round()
 data = ax.pcolormesh(board.grid, edgecolor='k', linewidth=0.2)
-fig.canvas.mpl_connect('key_press_event', controls)
+fig.canvas.mpl_connect('key_press_event', key_press_handler)
 
 while board.tetrimino is not None:
     board.tick()
