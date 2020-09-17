@@ -62,6 +62,9 @@ class Board:
                 self.draw_tetrimino()
         elif inp == 's':
             self.jump(np.array([1,0]))
+        elif inp == 'f':
+            self.draw_tetrimino(clean=True)
+            self.set_tetrimino(random.choice(DEFAULTS)())
 
     # Removes cleared row from board and shifts floating coral down
     def delete_row(self, row):
@@ -151,8 +154,7 @@ class Board:
             self.solidify_tetrimino()
             if self.game_over_check(): sys.exit(f'Game Over!\n\nFinal Score: {self.score}')
             self.row_check()
-            r = random.choice(DEFAULTS)
-            self.set_tetrimino(r())
+            self.set_tetrimino(random.choice(DEFAULTS)())
         else:
             self.gravity()
 
