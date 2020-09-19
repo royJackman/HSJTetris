@@ -20,7 +20,7 @@ def key_press_handler(event):
         fig.canvas.draw()
 
 # Set figsize and eliminate control collisions with matplotlib
-plt.rcParams['figure.figsize'] = (2.7, 8)
+plt.rcParams['figure.figsize'] = (3, 8)
 plt.rcParams['keymap.save'].remove('s')
 plt.rcParams['keymap.save'].remove('ctrl+s')
 plt.rcParams['keymap.quit'].remove('q')
